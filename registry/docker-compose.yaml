@@ -19,7 +19,6 @@ services:
       - "8600:8600/udp"
     command: "agent -config-dir /etc/consul.d/server.json -bootstrap"
   registry:
-    build: .
     image: "rackhd/registry:latest"
     container_name: "registry"
     hostname: "registry"

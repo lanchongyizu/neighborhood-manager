@@ -113,11 +113,13 @@ test-reg-local: lint-local
 	@ginkgo -r -race -trace -cover -randomizeAllSpecs --slowSpecThreshold=${SLOWTEST} ${REGISTRY}
 
 release: deps build
-	@docker build -t rackhd/${PROXY} rackhd
-	@docker build -t rackhd/endpoint rackhd/cmd/utils/
-	@docker build -t rackhd/${REGISTRY} registry
+	#@docker build -t rackhd/${PROXY} -f ./Dockerfile-proxy .
+	#@docker build -t rackhd/endpoint rackhd/cmd/utils/
+	@docker build -t rackhd/${REGISTRY} -f ./Dockerfile-registry .
 	@docker build -t rackhd/ssdpspoofer registry/cmd/ssdpspoofer/
 
+run-proxy: release
+	@docker-compose -f ${PROXY}/docker-compose.yaml up
 
-run: release
-	@docker-compose up --force-recreate
+run-reg: release
+	@docker-compose -f ${REGISTRY}/docker-compose.yaml up
