@@ -1,4 +1,5 @@
-#NM_RACKHD
+#neighborhood-manager
+#rackhd
 
 version: "2"
 
@@ -19,15 +20,16 @@ services:
       - "8600:8600/udp"
     command: "agent -config-dir /etc/consul.d/server.json -bootstrap"
   nm-rackhd-proxy:
-    build: .
+    build: ./rackhd
     image: "rackhd/rackhd:latest"
     container_name: "rackhd"
     hostname: "rackhd"
     links:
         - consulclient
+    ports:
+      - "10001:10001"
+      - "10001:10001/udp"
     expose:
-      - "10001"
-      - "10001/udp"
       - "10002"
       - "10002/udp"
       - "8300"
@@ -41,17 +43,34 @@ services:
       - "8600"
       - "8600/udp"
     command: "-proxy-address=http://localhost:10001 -backend-address=consulclient:8500"
+    volumes:
+      - "./bin:/go/bin"
     depends_on:
       - consulclient
-  ssdpspoofer:
-    build: ./cmd/utils
+  endpoint:
+    build: ./rackhd/cmd/utils
     image: "rackhd/endpoint:latest"
     container_name: "endpoint"
     hostname: "endpoint"
+    ports:
+      - "10002:10002"
+      - "10002:10002/udp"
     expose:
-      - "10002"
-      - "10002/udp"
+      - "10001"
+      - "10001/udp"
+      - "8300"
+      - "8301"
+      - "8301/udp"
+      - "8302"
+      - "8302/udp"
+      - "8400"
+      - "8500"
+      - "8500/udp"
+      - "8600"
+      - "8600/udp"
     command: "-endpoint-address=http://localhost:10002 -backend-address=consulclient:8500"
+    volumes:
+      - "./bin:/go/bin"
     depends_on:
         - consulclient
   consulclient:
